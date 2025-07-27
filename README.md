@@ -1,6 +1,6 @@
 # Todo-List-nodejs-app
 
-// Description:
+Description:
 
 The todo list application is a web-based application that allows users to create and manage a list of tasks. The user interface consists of a form to add new tasks, a list of all tasks, and controls to mark tasks as complete or delete them.
 
@@ -15,37 +15,37 @@ Overall, the todo list application using Node.js, Express.js, EJS, CSS, JavaScri
 Technologies Used: NodeJS, ExpressJS, EJS, CSS, JavaScript, Nodemon, MongoDB, Mongoose.
 
 
-// Home Page
+Home Page
 
 ![image](https://user-images.githubusercontent.com/92246613/225232515-4c100b6b-52e4-40f8-a6d4-85e30dc2f5e7.png)
 
 ![image](https://user-images.githubusercontent.com/92246613/225232670-274683a9-0dd6-488f-b40e-677e55ab21fa.png)
 
 
-// Dashboard
+Dashboard
 
 ![image](https://user-images.githubusercontent.com/92246613/225232960-da554f1f-ba4a-41f8-9856-edaebe339d76.png)
 
-// Add Tasks Form
+Add Tasks Form
 
 ![image](https://user-images.githubusercontent.com/92246613/225238829-05433362-5b16-454c-92d5-5e536fe6912e.png)
 
 
-// Pending Tasks
+Pending Tasks
 
 ![image](https://user-images.githubusercontent.com/92246613/225239140-226f8eae-d8b8-4055-8a68-d85d523c2422.png)
 
 ![image](https://user-images.githubusercontent.com/92246613/225239221-caf86f3d-ef17-4d18-80a6-c72123ff5444.png)
 
 
-// Completed Tasks
+Completed Tasks
 
 ![image](https://user-images.githubusercontent.com/92246613/225239406-98b7ba7d-df97-4d27-bb66-596a32187d87.png)
 
 ![image](https://user-images.githubusercontent.com/92246613/225239460-c811e0f3-e703-453a-bfef-2579bb83692a.png)
 
 
-// All Tasks
+All Tasks
 
 ![image](https://user-images.githubusercontent.com/92246613/225239841-4b5d77f0-4a54-4339-b6b3-b6a1be6776b5.png)
 
