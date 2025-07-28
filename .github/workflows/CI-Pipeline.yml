@@ -72,13 +72,14 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-
+      - name: Debug current directory
+        run: |
+          pwd
+          ls -la
+      
       - name: Copy docker-compose.yml content to EC2 via SSM
         run: | #Send SSM command to EC2 instance
-          ls -R
-          cd ../../Todo-List-nodejs-app
-          ls 
-          FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
+          FILE_CONTENT=$(base64 -w 0 ./docker-compose.yml)
           COPY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
