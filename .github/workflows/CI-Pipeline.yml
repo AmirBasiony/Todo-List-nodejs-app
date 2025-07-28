@@ -4,11 +4,17 @@ on:
   push:
     branches: [ "main" ]  # Trigger on push to main branch
 
+# env:
+#   AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+#   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+#   IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/todo-nodejs-app
+  
 env:
   AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/todo-nodejs-app
   EC2_INSTANCE_IDs: "i-0565c3d1b7f00d3df i-0078bb04aa9ce7ce2"  # Comma-separated list of EC2 instance IDs
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -25,7 +31,7 @@ jobs:
       
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
- 
+  
 
         # Prepare a dynamic image tag
       - name: Prepare image name and tag
