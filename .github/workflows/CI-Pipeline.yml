@@ -116,18 +116,23 @@ jobs:
         # EOF
         # )
       - name: Send SSM Deploy command to EC2 instance
-        id: send_ssm_command
         run: |
-          COMMANDS_TO_EXECUTE="(export IMAGE_NAME=${{ env.IMAGE_NAME }}:latest) && docker pull $IMAGE_NAME && cd ~ && docker compose -f docker-compose.yml down || true && docker compose -f docker-compose.yml up -d && docker ps"
-
+          COMMANDS_TO_EXECUTE="(export IMAGE_NAME=${{ env.IMAGE_NAME }}:latest) && \
+          echo 'Pulling image...' && docker pull \$IMAGE_NAME && \
+          echo 'Running docker compose down' && docker compose -f /home/ubuntu/docker-compose.yml down || true && \
+          echo 'Running docker compose up' && docker compose -f /home/ubuntu/docker-compose.yml up -d && \
+          docker ps"
+      
           DEPLOY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
-            --parameters "commands=[$COMMANDS_TO_EXECUTE]" \
+            --comment "Deploy application" \
+            --parameters "commands=[\"$COMMANDS_TO_EXECUTE\"]" \
             --query "Command.CommandId" \
             --output text)
-
+      
           echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
+      
 
       - name: Wait for Deploy command to finish
         run: |
@@ -142,4 +147,3 @@ jobs:
               echo "Logs for $INSTANCE_ID:"
               aws ssm get-command-invocation --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
             done
-        
