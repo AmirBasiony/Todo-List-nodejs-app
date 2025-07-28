@@ -16,7 +16,7 @@ resource "aws_lb_target_group" "web_tg" {
   vpc_id   = aws_vpc.AppVPC.id
 
    health_check {
-    path                = "/"
+    path                = "/health"
     port                = "4000"
     protocol            = "HTTP"
     healthy_threshold   = 2
