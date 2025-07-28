@@ -12,8 +12,8 @@ function section_header {
   echo "$1"
   echo "*******************************************************************************"
 }
-ls
-pwd
+# ls
+# pwd
 # Navigate to Terraform directory
 cd $TERRAFORM_DIR
 
@@ -52,8 +52,8 @@ cd "$ANSIBLE_DIR" || exit 1
 
 # Prepare inventory.ini
 section_header "**********************    Generating Ansible inventory     ********************"
-pwd
-ls
+# pwd
+# ls
 
 INVENTORY_FILE="inventory.ini"
 CONFIG_FILE="ansible.cfg"
@@ -76,8 +76,8 @@ ls
 
 cat $INVENTORY_FILE
 # Generate ansible.cfg
-pwd
-ls
+# pwd
+# ls
 section_header "**********************    Generating Ansible config     **********************"
 cat <<EOF > $CONFIG_FILE
 [defaults]
@@ -85,12 +85,12 @@ inventory = inventory.ini
 remote_tmp = /tmp/.ansible/tmp
 host_key_checking = False
 timeout = 60
-collections_paths = ~/.ansible/collections:/usr/share/ansible/collections
+collections_path = ~/.ansible/collections:/usr/share/ansible/collections
 EOF
 
 cat $CONFIG_FILE
-pwd
-ls
+# pwd
+# ls
 section_header "**********************    Run the Ansible playbook     **********************"
 # Run the Ansible playbook 
 ansible-playbook EC2_server.yaml -vvv
