@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   todo-app:
-    image: todo-nodejs-app  # The Docker image to use
+    image: ${IMAGE_NAME}  # Use the image built from the Dockerfile Dynmically
     container_name: todo-nodejs-app  # Specifies a custom name for the container
     ports:
       - "4000:4000"
@@ -12,10 +12,24 @@ services:
       - todo-data:/app/data
     networks:
       - todo-network
+    depends_on:
+      - mongo
     restart: unless-stopped
 
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/app/db
+    restart: unless-stopped
+    networks:
+      - todo-network
+      
 volumes:
   todo-data:
+  mongo_data:
 
 networks:
   todo-network:
