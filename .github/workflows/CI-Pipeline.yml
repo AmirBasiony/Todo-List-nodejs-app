@@ -76,20 +76,28 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       
-      - name: Copy docker-compose.yml to EC2 via SSM
+      - name: Upload .env and docker-compose.yml to EC2 via SSM
         run: |
-          FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
+          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}:latest" > .env
+      
+          ENV_FILE_CONTENT=$(base64 -w 0 .env)
+          COMPOSE_FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
+      
           COPY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
-            --instance-ids $EC2_INSTANCE_IDs \
-            --comment "Copy docker-compose.yml to EC2" \
+            --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
+            --comment "Upload .env and docker-compose.yml" \
             --parameters 'commands=[
-              "echo '$FILE_CONTENT' | base64 -d > /home/ubuntu/docker-compose.yml", 
+              "echo '"$ENV_FILE_CONTENT"' | base64 -d > /home/ubuntu/.env",
+              "echo '"$COMPOSE_FILE_CONTENT"' | base64 -d > /home/ubuntu/docker-compose.yml",
+              "cat /home/ubuntu/.env",
               "cat /home/ubuntu/docker-compose.yml"
             ]' \
             --output text \
             --query "Command.CommandId")
+      
           echo "COPY_COMMAND_ID=$COPY_COMMAND_ID" >> $GITHUB_ENV
+      
       
           
       - name: Wait for Copy command to finish
@@ -120,12 +128,13 @@ jobs:
       - name: Send SSM Deploy command to EC2 instance
       
         run: |
-          COMMANDS_TO_EXECUTE="(export IMAGE_NAME=${{ env.IMAGE_NAME }}:latest) && \
-          echo 'Pulling image...' && docker pull \$IMAGE_NAME && \
+          IMAGE="${{ env.IMAGE_NAME }}:latest"
+
+          COMMANDS_TO_EXECUTE="echo 'Pulling image...' && docker pull ${IMAGE} && \
           echo 'Running docker compose down' && docker compose -f /home/ubuntu/docker-compose.yml down || true && \
           echo 'Running docker compose up' && docker compose -f /home/ubuntu/docker-compose.yml up -d && \
           docker ps"
-      
+
           DEPLOY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
@@ -133,10 +142,11 @@ jobs:
             --parameters "commands=[\"$COMMANDS_TO_EXECUTE\"]" \
             --query "Command.CommandId" \
             --output text)
-      
-          echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
-      
 
+          echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
+
+      
+      
       - name: Wait for Deploy command to finish
         if: always()
         run: |
