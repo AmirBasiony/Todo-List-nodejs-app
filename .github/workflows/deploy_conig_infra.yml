@@ -37,13 +37,12 @@ jobs:
         run: |
           ansible-galaxy collection list | grep amazon.aws || echo "amazon.aws not installed"
         
-      - name: Run Ansible playbook
+      # - name: Run Ansible playbook
+      #   run: |
+      #     ansible-playbook Ansible_Rules/EC2_server.yaml -i Ansible_Rules/inventory.ini -vvv
+
+      - name: Run infrastructure build and configure script
+        working-directory: ./scripts
         run: |
-          ansible-playbook Ansible_Rules/EC2_server.yaml -i Ansible_Rules/inventory.ini -vvv
-
-
-    # - name: Run infrastructure build and configure script
-    #   working-directory: ./scripts
-    #   run: |
-    #     chmod +x ./infra_build_configure.sh
-    #     ./infra_build_configure.sh
+          chmod +x ./infra_build_configure.sh
+          ./infra_build_configure.sh

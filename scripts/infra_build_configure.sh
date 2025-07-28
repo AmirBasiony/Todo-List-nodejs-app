@@ -77,7 +77,7 @@ cat $CONFIG_FILE
 
 section_header "**********************    Run the Ansible playbook     **********************"
 # Run the Ansible playbook 
-ansible-playbook EC2_server.yaml
+ansible-playbook EC2_server.yaml -vvv
 
 section_header "*********** Application EC2 server is configured successfully     *************"
 
