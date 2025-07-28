@@ -93,6 +93,7 @@ jobs:
       
           
       - name: Wait for Copy command to finish
+        if: always()
         run: |
           for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
             echo "Waiting for command to complete on $INSTANCE_ID"
@@ -100,6 +101,7 @@ jobs:
           done
             
       - name: Show SSM Copy command logs
+        if: always()
         run: |
             for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
               echo "Logs for $INSTANCE_ID:"
@@ -116,6 +118,7 @@ jobs:
         # EOF
         # )
       - name: Send SSM Deploy command to EC2 instance
+      
         run: |
           COMMANDS_TO_EXECUTE="(export IMAGE_NAME=${{ env.IMAGE_NAME }}:latest) && \
           echo 'Pulling image...' && docker pull \$IMAGE_NAME && \
@@ -135,6 +138,7 @@ jobs:
       
 
       - name: Wait for Deploy command to finish
+        if: always()
         run: |
           for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
             echo "Waiting for command to complete on $INSTANCE_ID"
@@ -142,6 +146,7 @@ jobs:
           done
           
       - name: Show SSM Deploy command logs
+        if: always()
         run: |
             for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
               echo "Logs for $INSTANCE_ID:"
