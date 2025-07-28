@@ -6,8 +6,10 @@ services:
     container_name: todo-nodejs-app  # Specifies a custom name for the container
     ports:
       - "4000:4000"
-    env_file:
-      - .env
+    # env_file:
+    #   - .env
+    environment:
+      - mongoDbUrl=mongodb://mongo:27017/todolistDb
     volumes:
       - todo-data:/app/data
     networks:
