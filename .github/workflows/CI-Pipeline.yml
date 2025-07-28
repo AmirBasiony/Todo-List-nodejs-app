@@ -165,37 +165,46 @@ jobs:
       # "docker ps"
       # EOF
       # )
-    - name: Send SSM Deploy command to EC2 instances
-      run: |
-          COMMANDS_TO_EXECUTE=$(cat <<EOF
-          cat <<'EOL' > /home/ubuntu/.env
-          ${ENV_FILE_CONTENT}
-          EOL
-          
-          docker compose -f /home/ubuntu/docker-compose.yml down || true
-          docker compose -f /home/ubuntu/docker-compose.yml up -d
-          EOF
-            )
-          
-          echo "Running commands on: $INSTANCE_IDS"
-          
-          DEPLOY_COMMAND_ID=$(aws ssm send-command \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy latest app version" \
-            --targets "Key=instanceids,Values=$INSTANCE_IDS" \
-            --parameters "{\"commands\":[\"${COMMANDS_TO_EXECUTE//$'\n'/\",\"}\"]}" \
-            --region $AWS_REGION \
-            --output text \
-            --query "Command.CommandId")
-      
-          echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
 
+      # COMMANDS_TO_EXECUTE=$(cat <<EOF
+      # cat <<'EOL' > /home/ubuntu/.env
+      # ${ENV_FILE_CONTENT}
+      # EOL
+      
+      # docker compose -f /home/ubuntu/docker-compose.yml down || true
+      # docker compose -f /home/ubuntu/docker-compose.yml up -d
+      # EOF
+      #   )
+
+      # echo "Running commands on: $INSTANCE_IDS"
+      
+      # DEPLOY_COMMAND_ID=$(aws ssm send-command \
+      #   --document-name "AWS-RunShellScript" \
+      #   --comment "Deploy latest app version" \
+      #   --targets "Key=instanceids,Values=$INSTANCE_IDS" \
+      #   --parameters "{\"commands\":[\"${COMMANDS_TO_EXECUTE//$'\n'/\",\"}\"]}" \
+      #   --region $AWS_REGION \
+      #   --output text \
+      #   --query "Command.CommandId")
+    - name: Send SSM Deploy command to EC2 instances
+      run: |    
+        DEPLOY_COMMAND_ID=$(aws ssm send-command \
+          --document-name "AWS-RunShellScript" \
+          --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
+          --comment "Deploy latest app version" \
+          --parameters 'commands=[
+            "docker compose -f /home/ubuntu/docker-compose.yml down || true",
+            "docker compose -f /home/ubuntu/docker-compose.yml up -d"]' \
+          --output text \
+          --query "Command.CommandId")
+
+        echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
     
     
     - name: Wait for Deploy command to finish
       if: always()
       run: |
-        for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
+        for INSTANCE_ID in "${{ env.EC2_INSTANCE_IDs }}"; do
           echo "Waiting for command to complete on $INSTANCE_ID"
           aws ssm wait command-executed --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
         done
