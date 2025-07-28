@@ -4,17 +4,11 @@ on:
   push:
     branches: [ "main" ]  # Trigger on push to main branch
 
-# env:
-#   AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
-#   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-#   IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/todo-nodejs-app
-#   EC2_INSTANCE_IDs: "i-0565c3d1b7f00d3df i-0078bb04aa9ce7ce2"  # Comma-separated list of EC2 instance IDs
-
-
 env:
   AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/todo-nodejs-app
+  EC2_INSTANCE_IDs: "i-0565c3d1b7f00d3df i-0078bb04aa9ce7ce2"  # Comma-separated list of EC2 instance IDs
 
 jobs:
   build-and-push:
@@ -81,6 +75,7 @@ jobs:
 
       - name: Copy docker-compose.yml content to EC2 via SSM
         run: | #Send SSM command to EC2 instance
+          cd Todo-List-nodejs-app
           FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
           COPY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
@@ -108,35 +103,36 @@ jobs:
               aws ssm get-command-invocation --command-id $COPY_COMMAND_ID --instance-id $INSTANCE_ID
             done
 
-  #     - name: Send SSM Deploy command to EC2 instance
-  #       id: send_ssm_command
-  #       run: |
-  #         COMMANDS_TO_EXECUTE="export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest' && \
-  #         docker pull \$IMAGE_NAME && \ 
-  #         cd ~ && docker compose -f docker-compose.yml down || true && \
-  #         docker compose -f docker-compose.yml up -d && \
-  #         docker ps"
+      - name: Send SSM Deploy command to EC2 instance
+        id: send_ssm_command
+        run: |
+          cd Todo-List-nodejs-app
+          COMMANDS_TO_EXECUTE="export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest' && \
+          docker pull \$IMAGE_NAME && \ 
+          cd ~ && docker compose -f docker-compose.yml down || true && \
+          docker compose -f docker-compose.yml up -d && \
+          docker ps"
 
-  #         DEPLOY_COMMAND_ID=$(aws ssm send-command \
-  #           --document-name "AWS-RunShellScript" \
-  #           --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
-  #           --parameters "commands=[$COMMANDS_TO_EXECUTE]" \
-  #           --query "Command.CommandId" \
-  #           --output text)
+          DEPLOY_COMMAND_ID=$(aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
+            --parameters "commands=[$COMMANDS_TO_EXECUTE]" \
+            --query "Command.CommandId" \
+            --output text)
 
-  #         echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
+          echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
 
-  #     - name: Wait for Deploy command to finish
-  #       run: |
-  #         for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
-  #           echo "Waiting for command to complete on $INSTANCE_ID"
-  #           aws ssm wait command-executed --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
-  #         done
+      - name: Wait for Deploy command to finish
+        run: |
+          for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
+            echo "Waiting for command to complete on $INSTANCE_ID"
+            aws ssm wait command-executed --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
+          done
           
-  #     - name: Show SSM Deploy command logs
-  #       run: |
-  #           for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
-  #             echo "Logs for $INSTANCE_ID:"
-  #             aws ssm get-command-invocation --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
-  #           done
+      - name: Show SSM Deploy command logs
+        run: |
+            for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
+              echo "Logs for $INSTANCE_ID:"
+              aws ssm get-command-invocation --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
+            done
         
