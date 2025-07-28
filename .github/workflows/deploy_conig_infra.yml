@@ -30,7 +30,7 @@ jobs:
 
       - name: Run Ansible playbook
         run: |
-          ansible-playbook Ansible_Rules/EC2_server.yaml -i Ansible_Rules/inventory.ini
+          ansible-playbook Ansible_Rules/EC2_server.yaml -i Ansible_Rules/inventory.ini -vvv
 
 
     # - name: Run infrastructure build and configure script
