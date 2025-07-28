@@ -72,11 +72,11 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Debug current directory
+      - name: List all files
         run: |
-          pwd
-          ls -la
-          find . -type f
+          echo "PWD = $(pwd)"
+          find $GITHUB_WORKSPACE -type f
+      
       - name: Copy docker-compose.yml content to EC2 via SSM
         run: | #Send SSM command to EC2 instance
           FILE_CONTENT=$(base64 -w 0 ./docker-compose.yml)
