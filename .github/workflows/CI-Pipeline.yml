@@ -108,12 +108,15 @@ jobs:
       - name: Send SSM Deploy command to EC2 instance
         id: send_ssm_command
         run: |
-          
-          COMMANDS_TO_EXECUTE="export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest' && \
-          docker pull \$IMAGE_NAME && \ 
-          cd ~ && docker compose -f docker-compose.yml down || true && \
-          docker compose -f docker-compose.yml up -d && \
-          docker ps"
+          COMMANDS_TO_EXECUTE=$(cat <<EOF
+          export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest'
+          docker pull \$IMAGE_NAME
+          cd ~
+          docker compose -f docker-compose.yml down || true
+          docker compose -f docker-compose.yml up -d
+          docker ps
+          EOF
+          )
 
           DEPLOY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
