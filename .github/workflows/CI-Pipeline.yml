@@ -72,17 +72,14 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: List all files
-        run: |
-          echo "PWD = $(pwd)"
-          find $GITHUB_WORKSPACE -type f
       
-      - name: Copy docker-compose.yml content to EC2 via SSM
-        run: | #Send SSM command to EC2 instance
+      - name: Send docker-compose.yml via SSM
+        run: |
+          cp $GITHUB_WORKSPACE/docker-compose.yml ./docker-compose.yml
           FILE_CONTENT=$(base64 -w 0 ./docker-compose.yml)
           COPY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
-            --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
+            --instance-ids $EC2_INSTANCE_IDs \
             --comment "Copy docker-compose.yml to EC2" \
             --parameters 'commands=[
               "echo '$FILE_CONTENT' | base64 -d > docker-compose.yml"
@@ -90,6 +87,7 @@ jobs:
             --output text \
             --query "Command.CommandId")
           echo "COPY_COMMAND_ID=$COPY_COMMAND_ID" >> $GITHUB_ENV
+      
 
           
       - name: Wait for Copy command to finish
