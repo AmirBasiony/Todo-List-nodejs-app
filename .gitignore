@@ -1,2 +1,7 @@
 node_modules/
 terraform/todo-app-ssh-key.pem
+
+*tfvars*
+.terraform*
+*tfstate*
+
