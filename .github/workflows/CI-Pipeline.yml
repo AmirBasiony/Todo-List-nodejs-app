@@ -76,7 +76,7 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       
-      - name: Send docker-compose.yml via SSM
+      - name: Copy docker-compose.yml to EC2 via SSM
         run: |
           FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
           COPY_COMMAND_ID=$(aws ssm send-command \
@@ -84,7 +84,8 @@ jobs:
             --instance-ids $EC2_INSTANCE_IDs \
             --comment "Copy docker-compose.yml to EC2" \
             --parameters 'commands=[
-              "echo '$FILE_CONTENT' | base64 -d > docker-compose.yml"
+              "echo '$FILE_CONTENT' | base64 -d > /home/ubuntu/docker-compose.yml", 
+              "cat /home/ubuntu/docker-compose.yml"
             ]' \
             --output text \
             --query "Command.CommandId")
