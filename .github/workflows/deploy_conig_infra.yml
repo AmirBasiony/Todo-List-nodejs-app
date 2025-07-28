@@ -32,26 +32,37 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
       
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: pip install -r requirements.txt
       
-      - name: Install Ansible collections
-        run: ansible-galaxy collection install -r requirements.yml
-
+      - name: Install Ansible collections from requirements.yml
+        run: |
+          ansible-galaxy collection install -r requirements.yml
+      
+      - name: Explicitly install amazon.aws collection (fallback)
+        run: |
+          ansible-galaxy collection install amazon.aws || echo "amazon.aws already installed"
+      
       - name: Show installed Ansible collection versions
         run: ansible-galaxy collection list
-
-      - name: Check amazon.aws version
+      
+      - name: Verify amazon.aws version
         run: |
-          ansible-galaxy collection list | grep amazon.aws || echo "amazon.aws not installed"
+          if ! ansible-galaxy collection list | grep -q "amazon.aws"; then
+            echo "❌ amazon.aws collection is NOT installed"
+            exit 1
+          else
+            echo "✅ amazon.aws is installed"
+          fi
       
       - name: Install Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.10.5
-
+      
       - name: Install Graphviz
         run: sudo apt-get update && sudo apt-get install -y graphviz
+      
                 
       # - name: Run Ansible playbook
       #   run: |
