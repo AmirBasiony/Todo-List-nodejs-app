@@ -31,11 +31,14 @@ jobs:
           terraform_version: 1.10.5
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+            cd terraform
+            terraform init
 
       - name: Extract EC2 Instance IDs
         id: extract
         run: |
+          cd terraform
           IDS="$(terraform output -raw web_server_private1_id) $(terraform output -raw web_server_private2_id)"
           echo "instance_ids=$IDS"
           echo "instance_ids=$IDS" >> $GITHUB_OUTPUT
