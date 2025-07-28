@@ -75,7 +75,9 @@ jobs:
 
       - name: Copy docker-compose.yml content to EC2 via SSM
         run: | #Send SSM command to EC2 instance
-          cd Todo-List-nodejs-app
+          ls -R
+          cd ../../Todo-List-nodejs-app
+          ls 
           FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
           COPY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
@@ -106,7 +108,7 @@ jobs:
       - name: Send SSM Deploy command to EC2 instance
         id: send_ssm_command
         run: |
-          cd Todo-List-nodejs-app
+          cd ../../Todo-List-nodejs-app
           COMMANDS_TO_EXECUTE="export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest' && \
           docker pull \$IMAGE_NAME && \ 
           cd ~ && docker compose -f docker-compose.yml down || true && \
