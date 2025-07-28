@@ -19,7 +19,7 @@ cd $TERRAFORM_DIR
 
 # Build infrastructure
 section_header "*********************    Building the infrastructure     **********************"
-terraform init -reconfigure
+terraform init #-reconfigure
 terraform validate
 terraform apply -auto-approve -refresh=false
 
@@ -52,11 +52,15 @@ cd "$ANSIBLE_DIR" || exit 1
 
 # Prepare inventory.ini
 section_header "**********************    Generating Ansible inventory     ********************"
+pwd
+ls
+
 INVENTORY_FILE="inventory.ini"
 CONFIG_FILE="ansible.cfg"
 touch "$INVENTORY_FILE" && chmod 755 "$INVENTORY_FILE"
 
-
+pwd
+ls
 # Write private_ec2 inventory
 {
   echo "[private_ec2]"
@@ -72,7 +76,8 @@ touch "$INVENTORY_FILE" && chmod 755 "$INVENTORY_FILE"
 
 cat $INVENTORY_FILE
 # Generate ansible.cfg
-
+pwd
+ls
 section_header "**********************    Generating Ansible config     **********************"
 cat <<EOF > $CONFIG_FILE
 [defaults]
@@ -82,7 +87,8 @@ host_key_checking = False
 timeout = 60
 EOF
 cat $CONFIG_FILE
-
+pwd
+ls
 section_header "**********************    Run the Ansible playbook     **********************"
 # Run the Ansible playbook 
 ansible-playbook EC2_server.yaml -vvv
