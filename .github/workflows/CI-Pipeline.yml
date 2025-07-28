@@ -90,8 +90,6 @@ jobs:
             --query "Command.CommandId")
           echo "COPY_COMMAND_ID=$COPY_COMMAND_ID" >> $GITHUB_ENV
       
-      
-
           
       - name: Wait for Copy command to finish
         run: |
@@ -110,7 +108,7 @@ jobs:
       - name: Send SSM Deploy command to EC2 instance
         id: send_ssm_command
         run: |
-          cd ../../Todo-List-nodejs-app
+          
           COMMANDS_TO_EXECUTE="export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest' && \
           docker pull \$IMAGE_NAME && \ 
           cd ~ && docker compose -f docker-compose.yml down || true && \
