@@ -130,6 +130,7 @@ jobs:
           --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
           --comment "Upload .env and docker-compose.yml" \
           --parameters 'commands=[
+            "aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com",
             "echo '"$ENV_FILE_CONTENT"' | base64 -d > /home/ubuntu/.env",
             "echo '"$COMPOSE_FILE_CONTENT"' | base64 -d > /home/ubuntu/docker-compose.yml",
             "cat /home/ubuntu/.env",
