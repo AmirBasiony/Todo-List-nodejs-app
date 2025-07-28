@@ -16,3 +16,4 @@
 
   roles:
     - docker_install
+    - aws_cli_install
