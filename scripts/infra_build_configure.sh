@@ -12,8 +12,7 @@ function section_header {
   echo "$1"
   echo "*******************************************************************************"
 }
-# ls
-# pwd
+
 # Navigate to Terraform directory
 cd $TERRAFORM_DIR
 
@@ -52,15 +51,13 @@ cd "$ANSIBLE_DIR" || exit 1
 
 # Prepare inventory.ini
 section_header "**********************    Generating Ansible inventory     ********************"
-# pwd
-# ls
+
 
 INVENTORY_FILE="inventory.ini"
 CONFIG_FILE="ansible.cfg"
 touch "$INVENTORY_FILE" && chmod 755 "$INVENTORY_FILE"
 
-pwd
-ls
+
 # Write private_ec2 inventory
 {
   echo "[private_ec2]"
@@ -76,8 +73,7 @@ ls
 
 cat $INVENTORY_FILE
 # Generate ansible.cfg
-# pwd
-# ls
+
 section_header "**********************    Generating Ansible config     **********************"
 cat <<EOF > $CONFIG_FILE
 [defaults]
@@ -89,12 +85,17 @@ collections_path = ~/.ansible/collections:/usr/share/ansible/collections
 EOF
 
 cat $CONFIG_FILE
-# pwd
-# ls
+
 section_header "**********************    Run the Ansible playbook     **********************"
 # Run the Ansible playbook 
-ansible-playbook EC2_server.yaml -vvv
+ansible-playbook EC2_server.yaml # -vvv
 
 section_header "*********** Application EC2 server is configured successfully     *************"
-
+                
 cd ../
+
+section_header "***********     Push the changed to and trigger the pipeline      *************"
+
+git add .
+git commit -m "$1"
+git push 
