@@ -36,7 +36,15 @@ jobs:
       - name: Check amazon.aws version
         run: |
           ansible-galaxy collection list | grep amazon.aws || echo "amazon.aws not installed"
-        
+      
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Install Graphviz
+        run: sudo apt-get update && sudo apt-get install -y graphviz
+                
       # - name: Run Ansible playbook
       #   run: |
       #     ansible-playbook Ansible_Rules/EC2_server.yaml -i Ansible_Rules/inventory.ini -vvv

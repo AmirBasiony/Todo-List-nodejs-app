@@ -40,6 +40,12 @@ echo "$PRIVATE_ID_2"
 echo "SSM Bucket: $SSM_BUCKET"
 echo "region name: $AWS_REGION"
 
+if [[ -z "$PRIVATE_ID_1" || -z "$PRIVATE_ID_2" || -z "$AWS_REGION" ]]; then
+  echo "ERROR: One or more required Terraform outputs are missing."
+  exit 1
+fi
+
+
 # Navigate to Ansible directory
 cd "$ANSIBLE_DIR" || exit 1
 
@@ -48,6 +54,7 @@ section_header "**********************    Generating Ansible inventory     *****
 INVENTORY_FILE="inventory.ini"
 CONFIG_FILE="ansible.cfg"
 touch "$INVENTORY_FILE" && chmod 755 "$INVENTORY_FILE"
+
 
 # Write private_ec2 inventory
 {
