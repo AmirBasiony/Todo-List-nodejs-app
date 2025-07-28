@@ -160,8 +160,8 @@ jobs:
       # "export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest'",  
       # "docker pull $IMAGE_NAME", 
       # "cd ~", 
-      # "docker compose -f docker-compose.yml down || true", 
-      # "docker compose -f docker-compose.yml up -d", 
+      # "docker-compose -f docker-compose.yml down || true", 
+      # "docker-compose -f docker-compose.yml up -d", 
       # "docker ps"
       # EOF
       # )
@@ -171,8 +171,8 @@ jobs:
       # ${ENV_FILE_CONTENT}
       # EOL
       
-      # docker compose -f /home/ubuntu/docker-compose.yml down || true
-      # docker compose -f /home/ubuntu/docker-compose.yml up -d
+      # docker-compose -f /home/ubuntu/docker-compose.yml down || true
+      # docker-compose -f /home/ubuntu/docker-compose.yml up -d
       # EOF
       #   )
 
@@ -193,8 +193,8 @@ jobs:
           --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
           --comment "Deploy latest app version" \
           --parameters 'commands=[
-            "docker compose -f /home/ubuntu/docker-compose.yml down || true",
-            "docker compose -f /home/ubuntu/docker-compose.yml up -d"]' \
+            "docker-compose -f /home/ubuntu/docker-compose.yml down || true",
+            "docker-compose -f /home/ubuntu/docker-compose.yml up -d"]' \
           --output text \
           --query "Command.CommandId")
 
