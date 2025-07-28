@@ -19,9 +19,10 @@ cd $TERRAFORM_DIR
 
 # Build infrastructure
 section_header "*********************    Building the infrastructure     **********************"
-terraform init
+terraform init -reconfigure
 terraform validate
 terraform apply -auto-approve -refresh=false
+
 mkdir -p "$INFRA_DIAGRAM_DIR"
 terraform graph | dot -Tpng > "$INFRA_DIAGRAM_DIR/[Terraform]_Infra_In-Depth.png"
 
