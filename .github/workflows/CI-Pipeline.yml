@@ -204,9 +204,11 @@ jobs:
     - name: Wait for Deploy command to finish
       if: always()
       run: |
-        for INSTANCE_ID in "${{ env.EC2_INSTANCE_IDs }}"; do
-          echo "Waiting for command to complete on $INSTANCE_ID"
-          aws ssm wait command-executed --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
+        IFS=' ' read -r -a EC2_INSTANCE_IDS_ARRAY <<< "${{ env.EC2_INSTANCE_IDs }}"
+
+        for INSTANCE_ID in "${EC2_INSTANCE_IDS_ARRAY[@]}"; do
+          echo "Waiting for $INSTANCE_ID"
+          aws ssm wait command-executed --command-id "$DEPLOY_COMMAND_ID" --instance-id "$INSTANCE_ID"
         done
         
     - name: Show SSM Deploy command logs
