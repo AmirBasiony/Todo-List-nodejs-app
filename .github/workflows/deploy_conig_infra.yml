@@ -27,7 +27,16 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       
+      - name: Install Ansible collections
+        run: ansible-galaxy collection install -r requirements.yml
 
+      - name: Show installed Ansible collection versions
+        run: ansible-galaxy collection list
+
+      - name: Check amazon.aws version
+        run: |
+          ansible-galaxy collection list | grep amazon.aws || echo "amazon.aws not installed"
+        
       - name: Run Ansible playbook
         run: |
           ansible-playbook Ansible_Rules/EC2_server.yaml -i Ansible_Rules/inventory.ini -vvv
