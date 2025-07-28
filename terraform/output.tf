@@ -2,6 +2,10 @@ output "vpc_id" {
   value       = aws_vpc.AppVPC.id
   description = "The ID of the main application VPC"
 }
+output "aws_region" {
+  value       = var.aws_region
+  description = "The ID of the main application VPC"
+}
 
 output "public_subnet1_id" {
   value       = aws_subnet.public_subnet_1.id
@@ -76,3 +80,7 @@ output "ecr_registry" {
   value = data.aws_ecr_repository.app_ecr.registry_id
 }
 
+output "ansible_ssm_bucket_name" {
+  value       = aws_s3_bucket.ansible_ssm_bucket.id
+  description = "Name of the S3 bucket used for Ansible SSM"
+}

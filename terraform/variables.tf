@@ -18,7 +18,3 @@ variable "instance_type" {
   default     = "t2.micro"
 }
 
-variable "ssh_key_path" {
-  description = "Path to the SSH private key"
-  type        = string
-}

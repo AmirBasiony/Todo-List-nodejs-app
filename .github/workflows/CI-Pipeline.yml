@@ -1,9 +1,12 @@
 name: CI/CD Pipeline for Todo Node.js App
 
 on:
-  push:
-    branches: [ "main" ]  # Trigger on push to main branch
-
+  workflow_run:
+      workflows: ["Deploy Infrastructure and Configure EC2s"]  # Name of the deploy workflow
+      types:
+        - completed
+  workflow_dispatch:  # Optional manual trigger
+  
 env:
   AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
@@ -134,7 +137,7 @@ jobs:
           echo 'Running docker compose down' && docker compose -f /home/ubuntu/docker-compose.yml down || true && \
           echo 'Running docker compose up' && docker compose -f /home/ubuntu/docker-compose.yml up -d && \
           docker ps"
-
+            
           DEPLOY_COMMAND_ID=$(aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
