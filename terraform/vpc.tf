@@ -89,10 +89,10 @@ resource "aws_security_group" "WebTrafficSG" {
   vpc_id      = aws_vpc.AppVPC.id
 
   ingress {
-    from_port       = 4000
-    to_port         = 4000
-    protocol        = "tcp"
-    security_groups = [aws_security_group.alb_sg.id]
+  from_port   = 4000
+  to_port     = 4000
+  protocol    = "tcp"
+  security_groups = [aws_security_group.alb_sg.id] # Allow from ALB
   }
    ingress {
     from_port       = 443
