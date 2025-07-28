@@ -16,7 +16,7 @@ resource "aws_lb_target_group" "web_tg" {
   vpc_id   = aws_vpc.AppVPC.id
 
    health_check {
-    path                = "/health"
+    path                = "/"
     port                = "4000"
     protocol            = "HTTP"
     healthy_threshold   = 2
@@ -27,7 +27,6 @@ resource "aws_lb_target_group" "web_tg" {
   }
 }
 
-
 resource "aws_lb_listener" "web_listener" {
   load_balancer_arn = aws_lb.web_alb.arn
   port              = 80
@@ -37,7 +36,7 @@ resource "aws_lb_listener" "web_listener" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.web_tg.arn
   }
-}
+} 
 
 resource "aws_lb_target_group_attachment" "web1_attach" {
   target_group_arn = aws_lb_target_group.web_tg.arn
