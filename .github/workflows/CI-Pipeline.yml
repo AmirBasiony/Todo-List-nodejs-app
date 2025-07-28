@@ -117,28 +117,6 @@ jobs:
 
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
-
-    - name: Send SSM Deploy command to EC2 instance
-      env:
-        INSTANCE_IDS: ${{ steps.terraform.outputs.instance_ids }}
-        ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
-      run: |
-        COMMANDS_TO_EXECUTE="cat << 'EOF' > /home/ubuntu/.env
-        ${ENV_FILE_CONTENT}
-        EOF
-
-        docker compose -f /home/ubuntu/docker-compose.yml down || true
-        docker compose -f /home/ubuntu/docker-compose.yml up -d
-        "
-
-        aws ssm send-command \
-          --document-name "AWS-RunShellScript" \
-          --comment "Deploy latest app version" \
-          --targets "Key=instanceids,Values=$INSTANCE_IDS" \
-          --parameters "commands=$COMMANDS_TO_EXECUTE" \
-          --region us-east-1 \
-          --output text
-
     
     - name: Upload .env and docker-compose.yml to EC2 via SSM
       run: |
@@ -161,9 +139,7 @@ jobs:
           --query "Command.CommandId")
     
         echo "COPY_COMMAND_ID=$COPY_COMMAND_ID" >> $GITHUB_ENV
-    
-    
-        
+           
     - name: Wait for Copy command to finish
       if: always()
       run: |
@@ -190,22 +166,25 @@ jobs:
       # EOF
       # )
     - name: Send SSM Deploy command to EC2 instance
-    
+      env:
+        INSTANCE_IDS: ${{ steps.terraform.outputs.instance_ids }}
+        ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
       run: |
-        IMAGE="${{ env.IMAGE_NAME }}:latest"
+        COMMANDS_TO_EXECUTE="cat << 'EOF' > /home/ubuntu/.env
+        ${ENV_FILE_CONTENT}
+        EOF
 
-        COMMANDS_TO_EXECUTE="echo 'Pulling image...' && docker pull ${IMAGE} && \
-        echo 'Running docker compose down' && docker compose -f /home/ubuntu/docker-compose.yml down || true && \
-        echo 'Running docker compose up' && docker compose -f /home/ubuntu/docker-compose.yml up -d && \
-        docker ps"
-          
-        DEPLOY_COMMAND_ID=$(aws ssm send-command \
+        docker compose -f /home/ubuntu/docker-compose.yml down || true
+        docker compose -f /home/ubuntu/docker-compose.yml up -d
+        "
+
+        aws ssm send-command \
           --document-name "AWS-RunShellScript" \
-          --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
-          --comment "Deploy application" \
-          --parameters "commands=[\"$COMMANDS_TO_EXECUTE\"]" \
-          --query "Command.CommandId" \
-          --output text)
+          --comment "Deploy latest app version" \
+          --targets "Key=instanceids,Values=$INSTANCE_IDS" \
+          --parameters "commands=$COMMANDS_TO_EXECUTE" \
+          --region us-east-1 \
+          --output text
 
         echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
 
