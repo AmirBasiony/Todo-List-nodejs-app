@@ -33,43 +33,51 @@ jobs:
             ${{ runner.os }}-pip-
       
       - name: Install Python dependencies
-        run: pip install -r requirements.txt
+        run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements.txt
+      
       
       - name: Install Ansible collections from requirements.yml
         run: |
           ansible-galaxy collection install -r requirements.yml
       
-      - name: Explicitly install amazon.aws collection (fallback)
+      - name: Run EC2 Ansible Playbook
         run: |
-          ansible-galaxy collection install amazon.aws || echo "amazon.aws already installed"
+          cd Ansible_Rules
+          ansible-playbook -i inventory.ini EC2_server.yaml
+
+      # - name: Explicitly install amazon.aws collection (fallback)
+      #   run: |
+      #     ansible-galaxy collection install amazon.aws || echo "amazon.aws already installed"
       
-      - name: Show installed Ansible collection versions
-        run: ansible-galaxy collection list
+      # - name: Show installed Ansible collection versions
+      #   run: ansible-galaxy collection list
       
-      - name: Verify amazon.aws version
-        run: |
-          if ! ansible-galaxy collection list | grep -q "amazon.aws"; then
-            echo "❌ amazon.aws collection is NOT installed"
-            exit 1
-          else
-            echo "✅ amazon.aws is installed"
-          fi
+      # - name: Verify amazon.aws version
+      #   run: |
+      #     if ! ansible-galaxy collection list | grep -q "amazon.aws"; then
+      #       echo "❌ amazon.aws collection is NOT installed"
+      #       exit 1
+      #     else
+      #       echo "✅ amazon.aws is installed"
+      #     fi
       
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.10.5
+      # - name: Install Terraform
+      #   uses: hashicorp/setup-terraform@v3
+      #   with:
+      #     terraform_version: 1.10.5
       
-      - name: Install Graphviz
-        run: sudo apt-get update && sudo apt-get install -y graphviz
+      # - name: Install Graphviz
+      #   run: sudo apt-get update && sudo apt-get install -y graphviz
       
                 
-      # - name: Run Ansible playbook
-      #   run: |
-      #     ansible-playbook Ansible_Rules/EC2_server.yaml -i Ansible_Rules/inventory.ini -vvv
+      # # - name: Run Ansible playbook
+      # #   run: |
+      # #     ansible-playbook Ansible_Rules/EC2_server.yaml -i Ansible_Rules/inventory.ini -vvv
 
-      - name: Run infrastructure build and configure script
-        working-directory: ./scripts
-        run: |
-          chmod +x ./infra_build_configure.sh
-          ./infra_build_configure.sh
+      # - name: Run infrastructure build and configure script
+      #   working-directory: ./scripts
+      #   run: |
+      #     chmod +x ./infra_build_configure.sh
+      #     ./infra_build_configure.sh
