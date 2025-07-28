@@ -165,28 +165,30 @@ jobs:
       # "docker ps"
       # EOF
       # )
-    - name: Send SSM Deploy command to EC2 instance
-      env:
-        INSTANCE_IDS: ${{ steps.terraform.outputs.instance_ids }}
-        ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
+    - name: Send SSM Deploy command to EC2 instances
       run: |
-        COMMANDS_TO_EXECUTE="cat << 'EOF' > /home/ubuntu/.env
-        ${ENV_FILE_CONTENT}
-        EOF
-
-        docker compose -f /home/ubuntu/docker-compose.yml down || true
-        docker compose -f /home/ubuntu/docker-compose.yml up -d
-        "
-
-        aws ssm send-command \
-          --document-name "AWS-RunShellScript" \
-          --comment "Deploy latest app version" \
-          --targets "Key=instanceids,Values=$INSTANCE_IDS" \
-          --parameters "commands=$COMMANDS_TO_EXECUTE" \
-          --region us-east-1 \
-          --output text
-
-        echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
+          COMMANDS_TO_EXECUTE=$(cat <<EOF
+          cat <<'EOL' > /home/ubuntu/.env
+          ${ENV_FILE_CONTENT}
+          EOL
+          
+          docker compose -f /home/ubuntu/docker-compose.yml down || true
+          docker compose -f /home/ubuntu/docker-compose.yml up -d
+          EOF
+            )
+          
+          echo "Running commands on: $INSTANCE_IDS"
+          
+          DEPLOY_COMMAND_ID=$(aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy latest app version" \
+            --targets "Key=instanceids,Values=$INSTANCE_IDS" \
+            --parameters "{\"commands\":[\"${COMMANDS_TO_EXECUTE//$'\n'/\",\"}\"]}" \
+            --region $AWS_REGION \
+            --output text \
+            --query "Command.CommandId")
+      
+          echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
 
     
     
