@@ -1,10 +1,10 @@
 name: CI/CD Pipeline for Todo Node.js App
 
 on:
-  workflow_run:
-      workflows: ["Deploy Infrastructure and Configure EC2s"]  # Name of the deploy workflow
-      types:
-        - completed
+  # workflow_run:
+  #     workflows: ["Deploy Infrastructure and Configure EC2s"]  # Name of the deploy workflow
+  #     types:
+  #       - completed
   workflow_dispatch:  # Optional manual trigger
 
 env:
