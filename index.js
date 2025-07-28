@@ -98,9 +98,17 @@ app.get('/delete-task', function(req,res){
 });
 
 
-app.listen(port,(err) => {
+app.listen(port, '0.0.0.0', (err) => {
     if (err) {
         console.log(`Error: ${err}`);
     }
     console.log(`Yupp! Server is running on port ${port}`);
-})
+});
+
+
+// app.listen(port,(err) => {
+//     if (err) {
+//         console.log(`Error: ${err}`);
+//     }
+//     console.log(`Yupp! Server is running on port ${port}`);
+// })

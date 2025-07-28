@@ -32,3 +32,8 @@
 - name: Show AWS CLI version
   debug:
     msg: "AWS CLI installed: {{ aws_version_output.stdout }}"
+
+- name: Install net-tools
+  apt:
+    name: net-tools
+    state: present
