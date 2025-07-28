@@ -1,6 +1,3 @@
 ansible
 boto3
 botocore
-amazon-ssm
-boto
-
