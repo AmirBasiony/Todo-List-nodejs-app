@@ -1,21 +1,50 @@
-name: CI/CD Pipeline for Todo Node.js App
 
-on:
-  # workflow_run:
+# workflow_run:
   #     workflows: ["Deploy Infrastructure and Configure EC2s"]  # Name of the deploy workflow
   #     types:
-  #       - completed
-  workflow_dispatch:  # Optional manual trigger
-
+    #       - completed
+    # workflow_dispatch:  # Optional manual trigger
+name: CI/CD Pipeline for Todo Node.js App
+on:
+  push:
+    branches: [ "main" ]  # Trigger on push to main branch
 env:
   AWS_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
   AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   IMAGE_NAME: ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/todo-nodejs-app
-  EC2_INSTANCE_IDs: "i-0565c3d1b7f00d3df i-0078bb04aa9ce7ce2"  # Comma-separated list of EC2 instance IDs
+  # EC2_INSTANCE_IDs: "i-0565c3d1b7f00d3df i-0078bb04aa9ce7ce2"  # Comma-separated list of EC2 instance IDs
 
 jobs:
-  build-and-push:
+  get-ec2-ids:
+    name: Extract EC2 Instance IDs
     runs-on: ubuntu-latest
+    outputs:
+      EC2_INSTANCE_IDs: ${{ steps.extract.outputs.instance_ids }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.10.5
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Extract EC2 Instance IDs
+        id: extract
+        run: |
+          IDS="$(terraform output -raw web_server_private1_id) $(terraform output -raw web_server_private2_id)"
+          echo "instance_ids=$IDS"
+          echo "instance_ids=$IDS" >> $GITHUB_OUTPUT
+
+  build-and-push:
+    needs: get-ec2-ids
+    runs-on: ubuntu-latest
+    env:
+      EC2_INSTANCE_IDs: ${{ needs.get-ec2-ids.outputs.EC2_INSTANCE_IDs }}
 
     steps:
       - name: Checkout code
@@ -25,7 +54,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-
       
       - name: Install jq
         run: sudo apt-get update && sudo apt-get install -y jq
@@ -42,33 +70,6 @@ jobs:
       - name: Build and tag Docker image
         run: |
           docker build -t ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} .
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
-
-      - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      # Push the Docker image to the registry
-      - name: Push Docker image
-        run: |
-          
-          docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
-          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
-          docker push ${{ env.IMAGE_NAME }}:latest
-
-
-  deploy-via-ssm:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -79,90 +80,138 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
-      
-      - name: Upload .env and docker-compose.yml to EC2 via SSM
+      - name: Push Docker image
         run: |
-          echo "IMAGE_NAME=${{ env.IMAGE_NAME }}:latest" > .env
-      
-          ENV_FILE_CONTENT=$(base64 -w 0 .env)
-          COMPOSE_FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
-      
-          COPY_COMMAND_ID=$(aws ssm send-command \
-            --document-name "AWS-RunShellScript" \
-            --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
-            --comment "Upload .env and docker-compose.yml" \
-            --parameters 'commands=[
-              "echo '"$ENV_FILE_CONTENT"' | base64 -d > /home/ubuntu/.env",
-              "echo '"$COMPOSE_FILE_CONTENT"' | base64 -d > /home/ubuntu/docker-compose.yml",
-              "cat /home/ubuntu/.env",
-              "cat /home/ubuntu/docker-compose.yml"
-            ]' \
-            --output text \
-            --query "Command.CommandId")
-      
-          echo "COPY_COMMAND_ID=$COPY_COMMAND_ID" >> $GITHUB_ENV
-      
-      
           
-      - name: Wait for Copy command to finish
-        if: always()
-        run: |
-          for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
-            echo "Waiting for command to complete on $INSTANCE_ID"
-            aws ssm wait command-executed --command-id $COPY_COMMAND_ID --instance-id $INSTANCE_ID
-          done
-            
-      - name: Show SSM Copy command logs
-        if: always()
-        run: |
-            for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
-              echo "Logs for $INSTANCE_ID:"
-              aws ssm get-command-invocation --command-id $COPY_COMMAND_ID --instance-id $INSTANCE_ID
-            done
+          docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
+          docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.IMAGE_NAME }}:latest
 
-        # COMMANDS_TO_EXECUTE=$(cat <<EOF
-        # "export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest'",  
-        # "docker pull $IMAGE_NAME", 
-        # "cd ~", 
-        # "docker compose -f docker-compose.yml down || true", 
-        # "docker compose -f docker-compose.yml up -d", 
-        # "docker ps"
-        # EOF
-        # )
-      - name: Send SSM Deploy command to EC2 instance
-      
-        run: |
-          IMAGE="${{ env.IMAGE_NAME }}:latest"
+  deploy-via-ssm:
+    needs: [get-ec2-ids , build-and-push]
+    runs-on: ubuntu-latest
+    env:
+      EC2_INSTANCE_IDs: ${{ needs.get-ec2-ids.outputs.EC2_INSTANCE_IDs }}
 
-          COMMANDS_TO_EXECUTE="echo 'Pulling image...' && docker pull ${IMAGE} && \
-          echo 'Running docker compose down' && docker compose -f /home/ubuntu/docker-compose.yml down || true && \
-          echo 'Running docker compose up' && docker compose -f /home/ubuntu/docker-compose.yml up -d && \
-          docker ps"
-            
-          DEPLOY_COMMAND_ID=$(aws ssm send-command \
-            --document-name "AWS-RunShellScript" \
-            --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
-            --comment "Deploy application" \
-            --parameters "commands=[\"$COMMANDS_TO_EXECUTE\"]" \
-            --query "Command.CommandId" \
-            --output text)
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-          echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v3
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
 
-      
-      
-      - name: Wait for Deploy command to finish
-        if: always()
-        run: |
-          for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
-            echo "Waiting for command to complete on $INSTANCE_ID"
-            aws ssm wait command-executed --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
-          done
+    - name: Login to Amazon ECR
+      uses: aws-actions/amazon-ecr-login@v2
+
+    - name: Send SSM Deploy command to EC2 instance
+      env:
+        INSTANCE_IDS: ${{ steps.terraform.outputs.instance_ids }}
+        ENV_FILE_CONTENT: ${{ secrets.ENV_FILE_CONTENT }}
+      run: |
+        COMMANDS_TO_EXECUTE="cat << 'EOF' > /home/ubuntu/.env
+        ${ENV_FILE_CONTENT}
+        EOF
+
+        docker compose -f /home/ubuntu/docker-compose.yml down || true
+        docker compose -f /home/ubuntu/docker-compose.yml up -d
+        "
+
+        aws ssm send-command \
+          --document-name "AWS-RunShellScript" \
+          --comment "Deploy latest app version" \
+          --targets "Key=instanceids,Values=$INSTANCE_IDS" \
+          --parameters "commands=$COMMANDS_TO_EXECUTE" \
+          --region us-east-1 \
+          --output text
+
+    
+    - name: Upload .env and docker-compose.yml to EC2 via SSM
+      run: |
+        echo "IMAGE_NAME=${{ env.IMAGE_NAME }}:latest" > .env
+    
+        ENV_FILE_CONTENT=$(base64 -w 0 .env)
+        COMPOSE_FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
+    
+        COPY_COMMAND_ID=$(aws ssm send-command \
+          --document-name "AWS-RunShellScript" \
+          --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
+          --comment "Upload .env and docker-compose.yml" \
+          --parameters 'commands=[
+            "echo '"$ENV_FILE_CONTENT"' | base64 -d > /home/ubuntu/.env",
+            "echo '"$COMPOSE_FILE_CONTENT"' | base64 -d > /home/ubuntu/docker-compose.yml",
+            "cat /home/ubuntu/.env",
+            "cat /home/ubuntu/docker-compose.yml"
+          ]' \
+          --output text \
+          --query "Command.CommandId")
+    
+        echo "COPY_COMMAND_ID=$COPY_COMMAND_ID" >> $GITHUB_ENV
+    
+    
+        
+    - name: Wait for Copy command to finish
+      if: always()
+      run: |
+        for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
+          echo "Waiting for command to complete on $INSTANCE_ID"
+          aws ssm wait command-executed --command-id $COPY_COMMAND_ID --instance-id $INSTANCE_ID
+        done
           
-      - name: Show SSM Deploy command logs
-        if: always()
-        run: |
-            for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
-              echo "Logs for $INSTANCE_ID:"
-              aws ssm get-command-invocation --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
-            done
+    - name: Show SSM Copy command logs
+      if: always()
+      run: |
+          for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
+            echo "Logs for $INSTANCE_ID:"
+            aws ssm get-command-invocation --command-id $COPY_COMMAND_ID --instance-id $INSTANCE_ID
+          done
+
+      # COMMANDS_TO_EXECUTE=$(cat <<EOF
+      # "export IMAGE_NAME='${{ env.IMAGE_NAME }}:latest'",  
+      # "docker pull $IMAGE_NAME", 
+      # "cd ~", 
+      # "docker compose -f docker-compose.yml down || true", 
+      # "docker compose -f docker-compose.yml up -d", 
+      # "docker ps"
+      # EOF
+      # )
+    - name: Send SSM Deploy command to EC2 instance
+    
+      run: |
+        IMAGE="${{ env.IMAGE_NAME }}:latest"
+
+        COMMANDS_TO_EXECUTE="echo 'Pulling image...' && docker pull ${IMAGE} && \
+        echo 'Running docker compose down' && docker compose -f /home/ubuntu/docker-compose.yml down || true && \
+        echo 'Running docker compose up' && docker compose -f /home/ubuntu/docker-compose.yml up -d && \
+        docker ps"
+          
+        DEPLOY_COMMAND_ID=$(aws ssm send-command \
+          --document-name "AWS-RunShellScript" \
+          --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
+          --comment "Deploy application" \
+          --parameters "commands=[\"$COMMANDS_TO_EXECUTE\"]" \
+          --query "Command.CommandId" \
+          --output text)
+
+        echo "DEPLOY_COMMAND_ID=$DEPLOY_COMMAND_ID" >> $GITHUB_ENV
+
+    
+    
+    - name: Wait for Deploy command to finish
+      if: always()
+      run: |
+        for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
+          echo "Waiting for command to complete on $INSTANCE_ID"
+          aws ssm wait command-executed --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
+        done
+        
+    - name: Show SSM Deploy command logs
+      if: always()
+      run: |
+          for INSTANCE_ID in ${{ env.EC2_INSTANCE_IDs }}; do
+            echo "Logs for $INSTANCE_ID:"
+            aws ssm get-command-invocation --command-id $DEPLOY_COMMAND_ID --instance-id $INSTANCE_ID
+          done
