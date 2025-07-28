@@ -15,14 +15,15 @@ resource "aws_lb_target_group" "web_tg" {
   protocol = "HTTP"
   vpc_id   = aws_vpc.AppVPC.id
 
-  health_check {
-    path                = "/"
-    interval            = 30
-    timeout             = 5
+   health_check {
+    path                = "/health"
+    port                = "4000"
+    protocol            = "HTTP"
     healthy_threshold   = 2
     unhealthy_threshold = 2
+    timeout             = 5
+    interval            = 30
     matcher             = "200"
-    port                = "4000"
   }
 }
 
