@@ -15,9 +15,4 @@ router.get('/register', registerController.register);
 router.get('/alltask', alltaskController.alltask);
 router.get('/completedtask', completedtaskController.completedtask);
 
-// ✅ Add this line for ALB health check
-router.get('/health', (req, res) => {
-    res.status(200).send('Health check OK');
-  });
-  
 module.exports = router;

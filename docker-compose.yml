@@ -2,14 +2,12 @@ version: '3.8'
 
 services:
   todo-app:
-    image: ${IMAGE_NAME}
+    image: ${IMAGE_NAME} #todos-nodejs-app:latest myapp:latest  
     container_name: todo-nodejs-app
     ports:
       - "4000:4000"
-    env_file:
-      - .env
     environment:
-      - MONGO_URL=mongodb://mongo:27017/todolistDb
+      - mongoDbUrl=mongodb://mongo:27017/todolistDb
     volumes:
       - todo-data:/app/data
     depends_on:
