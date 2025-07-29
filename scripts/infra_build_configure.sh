@@ -34,11 +34,13 @@ SSM_TIMEOUT="60"
 
 # Display key info
 section_header "***********   The infrastructure is deployed successfully     *****************"
-echo "Private EC2 Instance IDs:"
-echo "$PRIVATE_ID_1"
-echo "$PRIVATE_ID_2"
-echo "SSM Bucket: $SSM_BUCKET"
-echo "region name: $AWS_REGION"
+echo           "***********            Private EC2 Instance IDs               *****************"
+echo           "***********                 $PRIVATE_ID_1                     *****************"
+echo           "***********                 $PRIVATE_ID_2                     *****************"
+echo           "***********            SSM Bucket: $SSM_BUCKET                *****************"
+echo           "***********            region name: $AWS_REGION               *****************"
+echo           "*******************************************************************************"
+
 
 if [[ -z "$PRIVATE_ID_1" || -z "$PRIVATE_ID_2" || -z "$AWS_REGION" ]]; then
   echo "ERROR: One or more required Terraform outputs are missing."
