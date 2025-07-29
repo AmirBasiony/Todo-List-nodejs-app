@@ -75,14 +75,14 @@ cat $INVENTORY_FILE
 # Generate ansible.cfg
 
 section_header "**********************    Generating Ansible config     **********************"
-cat <<EOF > $CONFIG_FILE
-[defaults]
-inventory = inventory.ini
-remote_tmp = /tmp/.ansible/tmp
-host_key_checking = False
-timeout = 60
-collections_path = ~/.ansible/collections:/usr/share/ansible/collections
-EOF
+{
+  [defaults]
+  inventory = inventory.ini
+  remote_tmp = /tmp/.ansible/tmp
+  host_key_checking = False
+  timeout = 60
+  collections_path = ~/.ansible/collections:/usr/share/ansible/collections
+} > "$CONFIG_FILE"
 
 cat $CONFIG_FILE
 
