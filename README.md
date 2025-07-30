@@ -1,54 +1,310 @@
-# Todo-List-nodejs-app
+# 📘 Todo List Node.js Application Documentation
 
-Description:
+---
 
-The todo list application is a web-based application that allows users to create and manage a list of tasks. The user interface consists of a form to add new tasks, a list of all tasks, and controls to mark tasks as complete or delete them.
+## 📦 Application Overview
 
-To create the application, Node.js is used to set up the server and handle the logic of the application. Express.js is used to create the routes for the application, allowing the user to interact with the application through a web browser. EJS is used to create the views for the application, allowing the user to see the list of tasks and the form to add new tasks. CSS is used to style the application, making it visually appealing and easy to use.
+A full-stack, containerized To-Do List application using **Node.js**, **Express.js**, **MongoDB**, **Docker**, deployed on **private EC2** instances using **AWS SSM**, **GitHub Actions**, **Terraform**, and **Ansible**. The app is accessed through an Application Load Balancer (**ALB**) in a public subnet.
 
-MongoDB and Mongoose are used to store the tasks in a database, allowing the user to add, delete, and update tasks as needed. Nodemon is used to monitor changes to the code and automatically restart the server, making it easy to develop and test the application.
+It offers features like `creating`, `editing`, `completing`, and `deleting` to-do items.
 
-When the user adds a new task using the form, Node.js and Express.js handle the request and store the task in the database using Mongoose. When the user views the list of tasks, EJS displays the tasks from the database in a list on the web page. When the user marks a task as complete or deletes a task, Node.js and Express.js handle the request and update the database using Mongoose.
+---
 
-Overall, the todo list application using Node.js, Express.js, EJS, CSS, JavaScript, MongoDB, Mongoose, and Nodemon can be a great way to create a functional and interactive web application that allows users to manage their tasks online. With the right combination of technologies, it is possible to create an application that is both functional and aesthetically pleasing, making it easy for users to manage their tasks in a convenient and efficient way.
+## Table of Contents
 
-Technologies Used: NodeJS, ExpressJS, EJS, CSS, JavaScript, Nodemon, MongoDB, Mongoose.
+* [Table of Contents](#-table-of-contents)
+* [Tech Stack](#-tech-stack) 
+* [Project Architecture](#project-architecture)
+* [Running the Application Locally](#running-the-application-locally)
+* [Running with Docker Compose](#running-with-docker-compose)
+* [Architecture Diagram](#architecture-diagram)
+* [Infrastructure Architecture](#infrastructure-architecture)
+* [Deploying to AWS](#deploying-to-aws)
+* [CI/CD Pipeline](#cicd-pipeline)
+* [Access the Application](#access--the-application)
+* [Destroying the Infrastructure](#destroying-the-infrastructure)
+* [Final Notes](#final-notes)
+
+---
+
+## Tech Stack
+
+* **Frontend/Backend**: Node.js, Express.js, EJS, CSS
+* **Database**: MongoDB with Mongoose
+* **Containerization**: Docker, Docker Compose
+* **Infrastructure as Code**: Terraform
+* **Configuration Management**: Ansible
+* **CI/CD**: GitHub Actions
+* **Cloud Provider**: AWS (EC2, SSM, ECR, ALB, VPC, IAM)
+
+---
+
+## 📁 Project Architecture
+
+### Directory Structure
+
+```bash
+Todo-List-nodejs-app
+├── Ansible_Rules/         # Ansible roles to install Docker, AWS CLI on EC2
+├── assets/                # Static assets (CSS & JS)
+├── config/                # MongoDB configuration
+├── controllers/           # Route handling logic
+├── docker-compose.yml     # Docker container definitions
+├── Dockerfile             # Node.js app Dockerfile
+├── models/                # MongoDB schemas
+├── routes/                # Express routing
+├── scripts/               # Automation scripts for infra
+├── terraform/             # Terraform IaC definitions
+├── views/                 # EJS frontend templates
+├── Project_Stages_Images/ # Diagrams and screenshots
+├── .github/workflows/     # GitHub Actions workflows
+├── index.js               # App entry point
+├── package.json           # Project metadata and dependencies
+```
+
+---
+
+## 🖥️ Running the Application Locally
+
+### 1. Clone the repo
+
+```bash
+git clone https://github.com/AmirBasiony/Todo-List-nodejs-app.git
+cd Todo-List-nodejs-app
+```
+
+### 2. Install dependencies
+
+```bash
+npm install
+```
+
+### 3. Start MongoDB
+
+Ensure MongoDB is running locally or accessible remotely.
+
+### 4. Run the app
+
+```bash
+npm start
+# or with nodemon
+dev: nodemon index.js
+```
+
+Visit: [http://localhost:4000](http://localhost:4000)
+
+---
+
+## 🐳 Running with Docker and Docker Compose
+
+**To containerize and run the app:**
+
+- build the docker image
+    ```bash
+    docker build -t `todo-app-image` .
+    ```
+- Edit image name by `todo-app-image` in the `docker-compose.yaml` file
+- Start the Application 
+    ```bash
+    docker-compose up --build
+    ```
+
+Then open: [http://localhost:4000](http://localhost:4000)
+
+---
 
 
-Home Page
+## 📷 Architecture Diagram
 
-![image](https://user-images.githubusercontent.com/92246613/225232515-4c100b6b-52e4-40f8-a6d4-85e30dc2f5e7.png)
+```
+                          +-------------------------------+
+                          |   Terraform Infrastructure    |
+                          | (VPC, Subnets, ALB, EC2, SSM) |
+                          +-------------------------------+
+                                        |
+                                        ▼
+              +--------------------------------------------------+
+              |     EC2 Instances in Private Subnet (via SSM)    |
+              |  - Docker Engine & AWS CLI installed via Ansible |
+              |  - App runs with docker-compose                  |
+              +--------------------------------------------------+
+                                        | Push the Changes
+                                        ▼                                                               
+                              +---------------------+
+                              |     GitHub Repo     |
+                              +---------------------+
+                                        | Trigger the Pipeline
+                                        ▼
+                            +-------------------------+
+                            | GitHub Actions Pipeline |
+                            +-------------------------+
+                                        ▲
+                                        |
+                             +--------------------+
+                             |  Application Load  |
+                             |     Balancer (ALB) |
+                             +--------------------+
+                                        |
+                                        ▼
+                           Accessible via ALB Public DNS
+```
 
-![image](https://user-images.githubusercontent.com/92246613/225232670-274683a9-0dd6-488f-b40e-677e55ab21fa.png)
+---
+
+## 🌐 Infrastructure Architecture
 
 
-Dashboard
+> Managed with `Terraform` and configured with `Ansible`.
 
-![image](https://user-images.githubusercontent.com/92246613/225232960-da554f1f-ba4a-41f8-9856-edaebe339d76.png)
+### 🏗️ Steps
 
-Add Tasks Form
+1. **Terraform** provisions the entire infrastructure:
 
-![image](https://user-images.githubusercontent.com/92246613/225238829-05433362-5b16-454c-92d5-5e536fe6912e.png)
+   * VPC, Internet Gateway, Route Tables
+   * Public & Private Subnets
+   * Security Groups
+   * ALB (public subnet) and EC2 (private subnet)
+   * IAM roles and policies for SSM and EC2 access
+
+2. **EC2 Instances** are launched in a **private subnet**, with:
+
+   * No public IPs
+   * Only accessible through **AWS Systems Manager (SSM)**
+
+3. **Ansible** is executed via the `setup.sh` script:
+
+   * Connects to EC2 instances through SSM
+   * Installs Docker and AWS CLI
+   * Prepares environment for Dockerized deployment
+
+---
+
+## ☁️ Deploying to AWS
+
+### **Prerequisites**
+
+1. **Set AWS Account Configuration**  
+   Run the following command on your localhost to configure your AWS account:  
+   ```bash
+   aws configure
+   ```
+   When prompted, provide the following details:  
+   - `AWS Access Key ID` (e.g., your_access_key_id)  
+   - `AWS Secret Access Key` (e.g., your_secret_access_key)  
+   - `Default region name` (e.g., us-east-1)  
+   - `Default output format` (leave blank or type `json`)
+
+2. **Set Up GitHub Actions CI/CD secrets**:
+   - `AWS_ACCESS_KEY_ID`
+   - `AWS_SECRET_ACCESS_KEY`
+   - `AWS_DEFAULT_REGION`
+   - `AWS_ACCOUNT_ID`
+
+### Step 1: Provision Infrastructure
+```bash
+cd scripts/
+./infra_build_configure.sh "Auto: Infra & Configure"
+```
+---
+### This script will:
+---
+1- Build the infrastructure using Terraform.
+  - The Extract EC2 IDs, region, ALB DNS After Building the infrastructure.
+
+![Terraform Environment Variables](./Project_Stages_Images/[Terrafrom]_Used_Infra_Environment_Vars.png)
+
+2- Prepare `inventory.ini` and `ansible.cfg`
+![Terraform Environment Variables](./Project_Stages_Images/[Ansible]Prepare-inventory.ini-and-ansible.cfg.png)
+
+3- Run Ansible playbook over AWS SSM to configure EC2s with **Docker** and **AWS CLI**.
+  - Installing Docker:  
+  
+![Installing Docker](./Project_Stages_Images/[Ansible_Rule]_for_Installing_Docker_on_both-EC2s.png)
+  - Installing AWS CLI:  
+
+![Installing AWS CLI](./Project_Stages_Images/[Ansible_Rule]_for_Installing_AWS-CLI_on_both-EC2s.png)
+
+4- Push changes to GitHub triggering the CI/CD pipeline
+![Terraform Environment Variables](./Project_Stages_Images/[Terrafrom]_Auto_Trigger_The_Pipeline.png)
+
+---
+### Detailed Infrastructure Diagram
+![Infra Diagram](./Project_Stages_Images/\[Terraform]_Infra_In-Depth.png)
+
+### Step 2: Access the App
+
+Visit the URL output by Terraform:
+
+```text
+http://<ALB_DNS_NAME>
+```
+
+---
+
+## 🚀 CI/CD Pipeline
+
+### Trigger
+
+* On push to `main` branch
+
+### Pipeline Stages
+
+#### 1️⃣ Get EC2 Instance IDs
+
+* Fetches Terraform outputs for EC2 IDs and ALB DNS
+
+#### 2️⃣ Build & Push Docker Image to ECR
+
+* Builds image using GitHub run number
+* Pushes to:
+
+```
+${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_DEFAULT_REGION }}.amazonaws.com/todo-nodejs-app
+```
+
+#### 3️⃣ Deploy via SSM to EC2
+
+* Uploads `.env` and `docker-compose.yml`
+* Sends SSM Run Command to run:
+
+```bash
+docker-compose down && docker-compose up -d
+```
+
+![CI/CD Pipeline](./Project_Stages_Images/GitHub_Action_CI\&CD_Pipeline.png)
 
 
-Pending Tasks
 
-![image](https://user-images.githubusercontent.com/92246613/225239140-226f8eae-d8b8-4055-8a68-d85d523c2422.png)
+### Access the Application
 
-![image](https://user-images.githubusercontent.com/92246613/225239221-caf86f3d-ef17-4d18-80a6-c72123ff5444.png)
+---
 
+## 🧹 Destroying the Infrastructure
 
-Completed Tasks
+```bash
+cd scripts/
+./infra_destroy.sh
+```
 
-![image](https://user-images.githubusercontent.com/92246613/225239406-98b7ba7d-df97-4d27-bb66-596a32187d87.png)
+Cleans up all AWS resources via `terraform destroy`.
 
-![image](https://user-images.githubusercontent.com/92246613/225239460-c811e0f3-e703-453a-bfef-2579bb83692a.png)
+---
 
+## 📬 Final Notes
 
-All Tasks
+This project demonstrates:
 
-![image](https://user-images.githubusercontent.com/92246613/225239841-4b5d77f0-4a54-4339-b6b3-b6a1be6776b5.png)
+* Scalable infrastructure using Terraform
+* Secure EC2 provisioning via Ansible + AWS SSM (no SSH)
+* CI/CD automation via GitHub Actions
+* Dockerized deployment to private EC2s
+* Public access through ALB only
 
-![image](https://user-images.githubusercontent.com/92246613/225239994-a5217721-e687-480e-9639-8a969410bb8f.png)
+Use `scripts/infra_destroy.sh` to clean up.
 
+Check GitHub Actions or AWS SSM logs for debugging.
 
+---
+
+🧑‍💻 Developed by **Amir Basiony**
+📨 [LinkedIn](https://www.linkedin.com/in/amirbasiony)
