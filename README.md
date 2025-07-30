@@ -12,7 +12,7 @@ It offers features like `creating`, `editing`, `completing`, and `deleting` to-d
 
 ## Table of Contents
 
-* [Tech Stack](#tech-stack) 
+* [Tech Stack](#tech-stack)
 * [Project Architecture](#project-architecture)
 * [Running the Application Locally](#running-the-application-locally)
 * [Running with Docker and Docker Compose](#running-with-docker-and-docker-compose)
@@ -23,6 +23,8 @@ It offers features like `creating`, `editing`, `completing`, and `deleting` to-d
 * [Access the Application](#access-the-application)
 * [Destroying the Infrastructure](#destroying-the-infrastructure)
 * [Final Notes](#final-notes)
+
+
 
 ---
 
@@ -38,9 +40,7 @@ It offers features like `creating`, `editing`, `completing`, and `deleting` to-d
 
 ---
 
-## 📁 Project Architecture
-
-### Directory Structure
+## Project Architecture
 
 ```bash
 Todo-List-nodejs-app
@@ -63,7 +63,7 @@ Todo-List-nodejs-app
 
 ---
 
-## 🖥️ Running the Application Locally
+## Running the Application Locally
 
 ### 1. Clone the repo
 
@@ -94,7 +94,7 @@ Visit: [http://localhost:4000](http://localhost:4000)
 
 ---
 
-## 🐳 Running with Docker and Docker Compose
+## Running with Docker and Docker Compose
 
 **To containerize and run the app:**
 
@@ -113,7 +113,7 @@ Then open: [http://localhost:4000](http://localhost:4000)
 ---
 
 
-## 📷 Architecture Diagram
+## Architecture Diagram
 
 ```
                           +-------------------------------+
@@ -150,7 +150,7 @@ Then open: [http://localhost:4000](http://localhost:4000)
 
 ---
 
-## 🌐 Infrastructure Architecture
+## Infrastructure Architecture
 
 Managed with `Terraform` and configured with `Ansible`.
 
@@ -177,7 +177,7 @@ Managed with `Terraform` and configured with `Ansible`.
 
 ---
 
-## ☁️ Deploying to AWS
+## Deploying to AWS
 
 ### **Prerequisites**
 
@@ -239,7 +239,7 @@ http://<ALB_DNS_NAME>
 
 ---
 
-## 🚀 CI/CD Pipeline
+## CI/CD Pipeline
 
 ### Trigger
 
@@ -283,7 +283,7 @@ docker-compose down && docker-compose up -d
 
 ---
 
-## 🧹 Destroying the Infrastructure
+## Destroying the Infrastructure
 
 ```bash
 cd scripts/
@@ -294,7 +294,7 @@ Cleans up all AWS resources via `terraform destroy`.
 
 ---
 
-## 📬 Final Notes
+## Final Notes
 
 This project demonstrates:
 
@@ -311,4 +311,4 @@ Check GitHub Actions or AWS SSM logs for debugging.
 ---
 
 🧑‍💻 Developed by **Amir Basiony**
-📨 [LinkedIn](https://www.linkedin.com/in/amirbasiony)
+📨 [LinkedIn](https://www.linkedin.com/in/amir-elbasiony-57809b204/)
