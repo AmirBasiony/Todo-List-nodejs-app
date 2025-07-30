@@ -29,14 +29,14 @@ PRIVATE_ID_1=$(terraform output -raw web_server_private1_id)
 PRIVATE_ID_2=$(terraform output -raw web_server_private2_id)
 SSM_BUCKET=$(terraform output -raw ansible_ssm_bucket_name)
 AWS_REGION=$(terraform output -raw aws_region)
+APP_URL=$(terraform output -raw alb_dns_name)
 SSM_TIMEOUT="60"
-
 # Display key info
 section_header "*******************   Infrastructure Deployed Successfully   ******************"
 echo           "*****************           Private EC2 Instance IDs           ****************"
 echo           "******************            $PRIVATE_ID_1            ******************"
 echo           "******************            $PRIVATE_ID_2            ******************"
-echo           "*****************    SSM Bucket: $SSM_BUCKET    ****************"
+echo           "********   APP URL: $APP_URL    *********"
 echo           "************************     AWS Region: $AWS_REGION     ************************"
 echo           "*******************************************************************************"
 
