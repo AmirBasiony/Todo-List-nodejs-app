@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   todo-app:
-    image: ${IMAGE_NAME} #todos-nodejs-app:latest myapp:latest  
+    image: ${IMAGE_NAME}
     container_name: todo-nodejs-app
     ports:
       - "4000:4000"
