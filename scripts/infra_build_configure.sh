@@ -32,12 +32,12 @@ AWS_REGION=$(terraform output -raw aws_region)
 SSM_TIMEOUT="60"
 
 # Display key info
-section_header "*******************   Infrastructure Deployed Successfully   *******************"
-echo           "*******************           Private EC2 Instance IDs           *******************"
-echo           "*******************            $PRIVATE_ID_1            *******************"
-echo           "*******************            $PRIVATE_ID_2            *******************"
-echo           "*******************    SSM Bucket: $SSM_BUCKET    *******************"
-echo           "*******************     AWS Region: $AWS_REGION     *******************"
+section_header "*******************   Infrastructure Deployed Successfully   ******************"
+echo           "*****************           Private EC2 Instance IDs           ****************"
+echo           "******************            $PRIVATE_ID_1            ******************"
+echo           "******************            $PRIVATE_ID_2            ******************"
+echo           "*****************    SSM Bucket: $SSM_BUCKET    ****************"
+echo           "************************     AWS Region: $AWS_REGION     ************************"
 echo           "*******************************************************************************"
 
 if [[ -z "$PRIVATE_ID_1" || -z "$PRIVATE_ID_2" || -z "$AWS_REGION" ]]; then
@@ -70,7 +70,7 @@ touch "$INVENTORY_FILE" && chmod 755 "$INVENTORY_FILE"
 cat "$INVENTORY_FILE"
 
 # Generate ansible.cfg
-section_header "**********************    Generating Ansible config     **********************"
+section_header "**********************    Generating Ansible config     ***********************"
 cat <<EOF > "$CONFIG_FILE"
 [defaults]
 inventory = inventory.ini
