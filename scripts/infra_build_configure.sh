@@ -82,7 +82,7 @@ EOF
 
 cat "$CONFIG_FILE"
 
-section_header "**********************    Run the Ansible playbook     **********************"
+section_header "***********************    Run the Ansible playbook     ***********************"
 # Run the Ansible playbook
 ansible-playbook EC2_server.yaml # -vvv
 
