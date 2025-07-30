@@ -103,7 +103,7 @@ Visit: [http://localhost:4000](http://localhost:4000)
     ```bash
     docker build -t `todo-app-image` .
     ```
-- Edit image name by `todo-app-image` in the `docker-compose.yaml` file
+- Edit the image name to `todo-app-image` in the `docker-compose.yaml` file
 - Start the Application 
     ```bash
     docker-compose up --build
@@ -153,8 +153,7 @@ Then open: [http://localhost:4000](http://localhost:4000)
 
 ## 🌐 Infrastructure Architecture
 
-
-> Managed with `Terraform` and configured with `Ansible`.
+Managed with `Terraform` and configured with `Ansible`.
 
 ### 🏗️ Steps
 
@@ -276,6 +275,12 @@ docker-compose down && docker-compose up -d
 
 
 ### Access the Application
+
+![Todo_App_Running_on_Both_EC2s_via_ALB_1](./Project_Stages_Images/Todo_App_Running_on_Both_EC2s_via_ALB_1.png)
+![Todo_App_Running_on_Both_EC2s_via_ALB_2](./Project_Stages_Images/Todo_App_Running_on_Both_EC2s_via_ALB_2.png)
+![Todo_App_Running_on_Both_EC2s_via_ALB_3](./Project_Stages_Images/Todo_App_Running_on_Both_EC2s_via_ALB_3.png)
+![Todo_App_Running_on_Both_EC2s_via_ALB_4](./Project_Stages_Images/Todo_App_Running_on_Both_EC2s_via_ALB_4.png)
+![Todo_App_Running_on_Both_EC2s_via_ALB_5](./Project_Stages_Images/Todo_App_Running_on_Both_EC2s_via_ALB_5.png)
 
 ---
 
