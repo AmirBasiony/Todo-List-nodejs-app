@@ -3,7 +3,7 @@
 # Define variables
 TERRAFORM_DIR="../terraform/"
 ANSIBLE_DIR="../Ansible_Rules/"
-INFRA_DIAGRAM_DIR="../infrastructure_diagram"
+INFRA_DIAGRAM_DIR="../Project_Stages_Images"
 
 # Function to display section header
 function section_header {
