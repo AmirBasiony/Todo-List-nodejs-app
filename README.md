@@ -12,16 +12,15 @@ It offers features like `creating`, `editing`, `completing`, and `deleting` to-d
 
 ## Table of Contents
 
-* [Table of Contents](#-table-of-contents)
-* [Tech Stack](#-tech-stack) 
+* [Tech Stack](#tech-stack) 
 * [Project Architecture](#project-architecture)
 * [Running the Application Locally](#running-the-application-locally)
-* [Running with Docker Compose](#running-with-docker-compose)
+* [Running with Docker and Docker Compose](#running-with-docker-and-docker-compose)
 * [Architecture Diagram](#architecture-diagram)
 * [Infrastructure Architecture](#infrastructure-architecture)
 * [Deploying to AWS](#deploying-to-aws)
 * [CI/CD Pipeline](#cicd-pipeline)
-* [Access the Application](#access--the-application)
+* [Access the Application](#access-the-application)
 * [Destroying the Infrastructure](#destroying-the-infrastructure)
 * [Final Notes](#final-notes)
 
