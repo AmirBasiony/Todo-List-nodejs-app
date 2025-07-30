@@ -8,7 +8,7 @@ services:
       - "4000:4000"
     environment:
       # - mongoDbUrl=mongodb://mongo:27017/todolistDb
-      - mongoDbUrl=mongodb+srv://ankitvis609:Sonu135790@cluster0.esi3ulq.mongodb.net/todolistDb
+      - mongoDbUrl="mongodb+srv://ankitvis609:Sonu135790@cluster0.esi3ulq.mongodb.net/todolistDb"
     volumes:
       - todo-data:/app/data
     depends_on:
