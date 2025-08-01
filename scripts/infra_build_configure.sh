@@ -21,6 +21,11 @@ terraform init #-reconfigure
 terraform validate
 terraform apply -auto-approve -refresh=false -lock=false
 
+if [ $? -ne 0 ]; then
+  echo "ERROR: Terraform apply failed. Please check the configuration."
+  exit 1
+fi
+
 mkdir -p "$INFRA_DIAGRAM_DIR"
 terraform graph | dot -Tpng > "$INFRA_DIAGRAM_DIR/[Terraform]_Infra_In-Depth.png"
 
@@ -86,7 +91,11 @@ cat "$CONFIG_FILE"
 
 section_header "***********************    Run the Ansible playbook     ***********************"
 # Run the Ansible playbook
-ansible-playbook EC2_server.yaml # -vvv
+ansible-playbook EC2_server.yaml
+if [ $? -ne 0 ]; then
+  echo "Ansible playbook execution failed."
+  exit 1
+fi
 
 section_header "*********** Application EC2 server is configured successfully     *************"
 

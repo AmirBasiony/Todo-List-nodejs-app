@@ -9,7 +9,7 @@ env:
 
 jobs:
   get-ec2-ids:
-    name: Extract EC2 Instance IDs & S3 URI
+    name: Extract Instance IDs & S3 URI
     runs-on: ubuntu-latest
     outputs:
       EC2_INSTANCE_IDs: ${{ steps.extract.outputs.instance_ids }}
@@ -127,12 +127,15 @@ jobs:
       run: |
         aws s3 ls ${{ env.S3_URI }}
         aws s3 cp ${{ env.S3_URI }} .env || echo "No .env file found in S3, skipping download"
+        cat .env
 
         
     - name: Upload .env and docker-compose.yml to EC2 via SSM
       run: |
+        cat .env
         echo "IMAGE_NAME=${{ env.IMAGE_NAME }}:latest" >> .env
-    
+        cat .env
+        
         ENV_FILE_CONTENT=$(base64 -w 0 .env)
         COMPOSE_FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
     
@@ -142,6 +145,7 @@ jobs:
           --comment "Upload .env and docker-compose.yml" \
           --parameters 'commands=[  
             "echo '"$ENV_FILE_CONTENT"' | base64 -d > /home/ubuntu/.env",
+            cat /home/ubuntu/.env",
             "echo '"$COMPOSE_FILE_CONTENT"' | base64 -d > /home/ubuntu/docker-compose.yml",
             "cat /home/ubuntu/.env",
             "cat /home/ubuntu/docker-compose.yml"
