@@ -5,3 +5,4 @@ terraform/todo-app-ssh-key.pem
 .terraform*
 *tfstate*
 
+.env

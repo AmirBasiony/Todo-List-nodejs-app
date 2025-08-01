@@ -6,24 +6,11 @@ services:
     container_name: todo-nodejs-app
     ports:
       - "4000:4000"
-    environment:
-      - mongoDbUrl=mongodb://mongo:27017/todolistDb
-      # - mongoDbUrl="mongodb+srv://ankitvis609:Sonu135790@cluster0.esi3ulq.mongodb.net/todolistDb"
+    env_file:
+      - .env
     volumes:
       - todo-data:/app/data
-    depends_on:
-      - mongo
-    restart: unless-stopped
-
-  mongo:
-    image: mongo:6.0
-    container_name: mongo
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo_data:/data/db
     restart: unless-stopped
 
 volumes:
   todo-data:
-  mongo_data:
