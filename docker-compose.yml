@@ -6,8 +6,6 @@ services:
     container_name: todo-nodejs-app
     ports:
       - "4000:4000"
-    # env_file:
-    #   - .env
     environment:
       - mongoDbUrl=mongodb+srv://amirbasiony14:dLLe8UlvguXQCQmF@cluster0.posieve.mongodb.net/todolist?retryWrites=true&w=majority&appName=Cluster0
     volumes:
@@ -16,3 +14,6 @@ services:
 
 volumes:
   todo-data:
+
+    # env_file:
+    #   - .env
