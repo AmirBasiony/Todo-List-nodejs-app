@@ -9,7 +9,7 @@ env:
 
 jobs:
   get-ec2-ids:
-    name: Extract EC2 Instance IDs
+    name: Extract EC2 Instance IDs & S3 URI
     runs-on: ubuntu-latest
     outputs:
       EC2_INSTANCE_IDs: ${{ steps.extract.outputs.instance_ids }}
@@ -48,6 +48,7 @@ jobs:
       - name: Extract S3 bucket URI
         id: extract_s3_uri
         run: |
+          cd terraform
           S3_URI=$(terraform output -raw env_file_s3_uri)
           echo "S3_URI=$S3_URI"
           echo "S3_URI=$S3_URI" >> $GITHUB_OUTPUT
