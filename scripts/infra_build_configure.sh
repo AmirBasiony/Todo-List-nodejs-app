@@ -28,7 +28,7 @@ terraform graph | dot -Tpng > "$INFRA_DIAGRAM_DIR/[Terraform]_Infra_In-Depth.png
 PRIVATE_ID_1=$(terraform output -raw web_server_private1_id)
 PRIVATE_ID_2=$(terraform output -raw web_server_private2_id)
 SSM_BUCKET=$(terraform output -raw ansible_ssm_bucket_name)
-ENV_FILE_S3_URL=$(terraform output -raw ansible_ssm_bucket_name)
+ENV_FILE_S3_URL=$(terraform output -raw env_file_s3_uri)
 AWS_REGION=$(terraform output -raw aws_region)
 APP_URL=$(terraform output -raw alb_dns_name)
 SSM_TIMEOUT="60"

@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "ansible_ssm_bucket" {
 
 # Create S3 Bucket for environment variables
 resource "aws_s3_bucket" "project_env_vars" {
-  bucket = "environment-vars"
+  bucket = "environment-vars-bucket-2025"
 
   tags = {
     Description = "Saving the Terraform state file"
