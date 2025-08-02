@@ -84,7 +84,3 @@ output "ansible_ssm_bucket_name" {
   value       = aws_s3_bucket.ansible_ssm_bucket.id
   description = "Name of the S3 bucket used for Ansible SSM"
 }
-
-output "env_file_s3_uri" {
-  value = "s3://${aws_s3_bucket.project_env_vars.bucket}/${aws_s3_object.bucket_object.key}"
-}

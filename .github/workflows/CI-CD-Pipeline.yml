@@ -9,11 +9,10 @@ env:
 
 jobs:
   get-ec2-ids:
-    name: Extract Instance IDs & S3 URI
+    name: Extract EC2 Instance IDs
     runs-on: ubuntu-latest
     outputs:
       EC2_INSTANCE_IDs: ${{ steps.extract.outputs.instance_ids }}
-      S3_URI: ${{ steps.extract_s3_uri.outputs.S3_URI }}
 
     steps:
       - name: Checkout repo
@@ -44,16 +43,7 @@ jobs:
           IDS="$(terraform output -raw web_server_private1_id) $(terraform output -raw web_server_private2_id)"
           echo "instance_ids=$IDS"
           echo "instance_ids=$IDS" >> $GITHUB_OUTPUT
-     
-      - name: Extract S3 bucket URI
-        id: extract_s3_uri
-        run: |
-          cd terraform
-          S3_URI=$(terraform output -raw env_file_s3_uri)
-          echo "S3_URI=$S3_URI"
-          echo "S3_URI=$S3_URI" >> $GITHUB_OUTPUT
-        
-              
+
   build-and-push:
     needs: get-ec2-ids
     runs-on: ubuntu-latest
@@ -80,7 +70,6 @@ jobs:
           BUILD_ID=${{ github.run_number }}
           IMAGE_TAG="v$VERSION.$BUILD_ID"
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-
       # Build and push the Docker image
       - name: Build and tag Docker image
         run: |
@@ -98,6 +87,7 @@ jobs:
 
       - name: Push Docker image
         run: |
+          
           docker push ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           docker tag ${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }} ${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.IMAGE_NAME }}:latest
@@ -107,8 +97,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       EC2_INSTANCE_IDs: ${{ needs.get-ec2-ids.outputs.EC2_INSTANCE_IDs }}
-      S3_URI: ${{ needs.get-ec2-ids.outputs.S3_URI }}
-      
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -123,19 +112,16 @@ jobs:
     - name: Login to Amazon ECR
       uses: aws-actions/amazon-ecr-login@v2
     
-    - name: Download .env file from S3
-      run: |
-        aws s3 ls ${{ env.S3_URI }}
-        aws s3 cp ${{ env.S3_URI }} .env || echo "No .env file found in S3, skipping download"
-        cat .env
 
-        
     - name: Upload .env and docker-compose.yml to EC2 via SSM
       run: |
-        cat .env
+        sed -i '/^IMAGE_NAME=/d' .env || true
+        sed -i '/^mongoDbUrl=/d' .env || true
+
+        echo "mongoDbUrl=${{ secrets.MONGO_DB_URL }}" > .env
         echo "IMAGE_NAME=${{ env.IMAGE_NAME }}:latest" >> .env
         cat .env
-        
+      
         ENV_FILE_CONTENT=$(base64 -w 0 .env)
         COMPOSE_FILE_CONTENT=$(base64 -w 0 docker-compose.yml)
     
@@ -145,7 +131,6 @@ jobs:
           --comment "Upload .env and docker-compose.yml" \
           --parameters 'commands=[  
             "echo '"$ENV_FILE_CONTENT"' | base64 -d > /home/ubuntu/.env",
-            cat /home/ubuntu/.env",
             "echo '"$COMPOSE_FILE_CONTENT"' | base64 -d > /home/ubuntu/docker-compose.yml",
             "cat /home/ubuntu/.env",
             "cat /home/ubuntu/docker-compose.yml"
@@ -154,6 +139,7 @@ jobs:
           --query "Command.CommandId")
     
         echo "COPY_COMMAND_ID=$COPY_COMMAND_ID" >> $GITHUB_ENV
+
            
     - name: Wait for Copy command to finish
       if: always()

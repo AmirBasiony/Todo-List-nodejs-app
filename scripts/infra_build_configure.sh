@@ -21,11 +21,6 @@ terraform init #-reconfigure
 terraform validate
 terraform apply -auto-approve -refresh=false -lock=false
 
-if [ $? -ne 0 ]; then
-  echo "ERROR: Terraform apply failed. Please check the configuration."
-  exit 1
-fi
-
 mkdir -p "$INFRA_DIAGRAM_DIR"
 terraform graph | dot -Tpng > "$INFRA_DIAGRAM_DIR/[Terraform]_Infra_In-Depth.png"
 
@@ -33,7 +28,6 @@ terraform graph | dot -Tpng > "$INFRA_DIAGRAM_DIR/[Terraform]_Infra_In-Depth.png
 PRIVATE_ID_1=$(terraform output -raw web_server_private1_id)
 PRIVATE_ID_2=$(terraform output -raw web_server_private2_id)
 SSM_BUCKET=$(terraform output -raw ansible_ssm_bucket_name)
-ENV_FILE_S3_URL=$(terraform output -raw env_file_s3_uri)
 AWS_REGION=$(terraform output -raw aws_region)
 APP_URL=$(terraform output -raw alb_dns_name)
 SSM_TIMEOUT="60"
@@ -43,7 +37,6 @@ echo           "*****************           Private EC2 Instance IDs           *
 echo           "******************            $PRIVATE_ID_1            ******************"
 echo           "******************            $PRIVATE_ID_2            ******************"
 echo           "********   APP URL: $APP_URL    *********"
-echo           "**************   ENV FILE S3 URL: $ENV_FILE_S3_URL    ***************"
 echo           "************************     AWS Region: $AWS_REGION     ************************"
 echo           "*******************************************************************************"
 
@@ -91,11 +84,7 @@ cat "$CONFIG_FILE"
 
 section_header "***********************    Run the Ansible playbook     ***********************"
 # Run the Ansible playbook
-ansible-playbook EC2_server.yaml
-if [ $? -ne 0 ]; then
-  echo "Ansible playbook execution failed."
-  exit 1
-fi
+ansible-playbook EC2_server.yaml # -vvv
 
 section_header "*********** Application EC2 server is configured successfully     *************"
 
