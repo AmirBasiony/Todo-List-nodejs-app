@@ -158,7 +158,9 @@ jobs:
           done
 
     - name: Send SSM Deploy command to EC2 instances
-      run: |    
+      run: |
+        cat .env
+
         DEPLOY_COMMAND_ID=$(aws ssm send-command \
           --document-name "AWS-RunShellScript" \
           --instance-ids ${{ env.EC2_INSTANCE_IDs }} \
