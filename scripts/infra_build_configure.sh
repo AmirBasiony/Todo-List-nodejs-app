@@ -77,8 +77,8 @@ inventory = inventory.ini
 remote_tmp = /tmp/.ansible/tmp
 host_key_checking = False
 timeout = 60
-# collections_path = ~/.ansible/collections:/usr/share/ansible/collections
 EOF
+# collections_path = ~/.ansible/collections:/usr/share/ansible/collections
 
 cat "$CONFIG_FILE"
 
