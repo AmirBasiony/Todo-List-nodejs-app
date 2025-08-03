@@ -118,7 +118,7 @@ jobs:
         sed -i '/^IMAGE_NAME=/d' .env || true
         sed -i '/^mongoDbUrl=/d' .env || true
 
-        echo "mongoDbUrl=${{ secrets.MONGO_DB_URL }}" > .env
+        echo "MONGO_DB_URL=${{ secrets.MONGO_DB_URL }}" > .env
         echo "IMAGE_NAME=${{ env.IMAGE_NAME }}:latest" >> .env
         cat .env
       

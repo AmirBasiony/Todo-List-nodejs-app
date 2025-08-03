@@ -6,10 +6,8 @@ services:
     container_name: todo-nodejs-app
     ports:
       - "4000:4000"
-    # env_file:
-    #   - .env
     environment:
-      - mongoDbUrl=mongodb+srv://amirbasiony14:11112222@cluster-1.tzme51z.mongodb.net/?retryWrites=true&w=majority&appName=Cluster-1
+      - mongoDbUrl=${MONGO_DB_URL}
     volumes:
       - todo-data:/app/data
     restart: unless-stopped
