@@ -63,7 +63,7 @@ touch "$INVENTORY_FILE" && chmod 755 "$INVENTORY_FILE"
   echo "[private_ec2:vars]"
   echo "ansible_connection=amazon.aws.aws_ssm"
   echo "ansible_region=$AWS_REGION"
-  echo "ansible_aws_ssm_bucket_name=$SSM_BUCKET"
+  # echo "ansible_aws_ssm_bucket_name=$SSM_BUCKET"
   echo "ansible_aws_ssm_timeout=$SSM_TIMEOUT"
 } > "$INVENTORY_FILE"
 
@@ -77,7 +77,7 @@ inventory = inventory.ini
 remote_tmp = /tmp/.ansible/tmp
 host_key_checking = False
 timeout = 60
-collections_path = ~/.ansible/collections:/usr/share/ansible/collections
+# collections_path = ~/.ansible/collections:/usr/share/ansible/collections
 EOF
 
 cat "$CONFIG_FILE"
