@@ -2,14 +2,12 @@ version: '3.8'
 
 services:
   todo-app:
-    image: ${IMAGE_NAME}
+    image: todo-nodejs-app:latest # ${IMAGE_NAME}
     container_name: todo-nodejs-app
     ports:
       - "4000:4000"
     env_file:
       - .env
-    # - environment:
-    #   - mongoDbUrl=mongodb+srv://amirbasiony14:dLLe8UlvguXQCQmF@cluster0.posieve.mongodb.net/todolist?retryWrites=true&w=majority&appName=Cluster0
     volumes:
       - todo-data:/app/data
     restart: unless-stopped

@@ -100,7 +100,12 @@ resource "aws_security_group" "WebTrafficSG" {
     protocol        = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+  ingress {
+    from_port   = 27017
+    to_port     = 27017
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"] # Allow MongoDB access from anywhere, adjust as needed
+  }
   egress {
     from_port   = 0
     to_port     = 0
@@ -114,7 +119,7 @@ resource "aws_security_group" "WebTrafficSG" {
 
 resource "aws_security_group" "alb_sg" {
   name        = "alb-sg"
-  description = "Allow inbound access on port 4000"
+  description = "Allow inbound access on port 4000, and 80 for ALB"
   vpc_id      = aws_vpc.AppVPC.id
 
   ingress {
