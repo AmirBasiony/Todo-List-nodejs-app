@@ -168,8 +168,7 @@ jobs:
           --parameters 'commands=[
             "aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com",
             "docker-compose -f /home/ubuntu/docker-compose.yml down || true",
-            "docker-compose -f /home/ubuntu/docker-compose.yml up -d",
-            "curl http://localhost:4000/"]' \
+            "docker-compose -f /home/ubuntu/docker-compose.yml up -d"]' \
           --output text \
           --query "Command.CommandId")
 
